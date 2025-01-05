@@ -43,8 +43,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil3.compose.rememberAsyncImagePainter
 import hr.ferit.imeprezime.naziv_projekta.R
 import hr.ferit.imeprezime.naziv_projekta.Routes
+import hr.ferit.imeprezime.naziv_projekta.data.Recipe
+import hr.ferit.imeprezime.naziv_projekta.data.RecipeViewModel
 import hr.ferit.imeprezime.naziv_projekta.ui.theme.DarkGray
 import hr.ferit.imeprezime.naziv_projekta.ui.theme.Gray
 import hr.ferit.imeprezime.naziv_projekta.ui.theme.LightGray
@@ -55,11 +58,12 @@ import hr.ferit.imeprezime.naziv_projekta.ui.theme.White
 
 @Composable
 fun RecipeDetailsScreen(
+    viewModel: RecipeViewModel,
     navigation: NavController,
-    recipeId: Int,
+    recipeId: Int
 ) {
-    val recipe = recipes[recipeId]
     val scrollState = rememberLazyListState()
+    val recipe = viewModel.recipesData[recipeId]
     LazyColumn(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -70,6 +74,7 @@ fun RecipeDetailsScreen(
         item {
             TopImageAndBar(
                 coverImage = recipe.image,
+                viewModel = viewModel,
                 navigation = navigation,
                 recipe = recipe
             )
@@ -112,9 +117,11 @@ fun CircularButton(
         )
     }
 }
+
 @Composable
 fun TopImageAndBar(
-    @DrawableRes coverImage: Int,
+    coverImage: String,
+    viewModel: RecipeViewModel,
     navigation: NavController,
     recipe: Recipe
 ) {
@@ -124,7 +131,7 @@ fun TopImageAndBar(
             .fillMaxWidth()
     ) {
         Image(
-            painter = painterResource(id = coverImage),
+            painter = rememberAsyncImagePainter(model = coverImage),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -144,12 +151,19 @@ fun TopImageAndBar(
                     .height(56.dp)
                     .padding(horizontal = 16.dp)
             ) {
-                CircularButton(R.drawable.ic_arrow_back) {
-                    navigation.navigate("recipeList")
-                }
-                CircularButton(R.drawable.ic_favorite,
-                    color = if(recipe.isFavorited) Color.Magenta else Color.DarkGray) {
+                CircularButton(
+                iconResource = R.drawable.ic_arrow_back,
+                color = Pink
+            ) {
+                navigation.popBackStack(Routes.SCREEN_ALL_RECIPES,
+                    false)
+            }
+                CircularButton(
+                    iconResource = R.drawable.ic_favorite,
+                    color = if(recipe.isFavorited) Pink else DarkGray
+                ) {
                     recipe.isFavorited = !recipe.isFavorited
+                    viewModel.updateRecipe(recipe)
                 }
             }
             Box(
@@ -164,10 +178,11 @@ fun TopImageAndBar(
                             startY = 100f
                         )
                     )
-                )
-            }
+            )
         }
+    }
 }
+
 
 @Composable
 fun ScreenInfo(

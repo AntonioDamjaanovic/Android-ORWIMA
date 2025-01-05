@@ -42,119 +42,20 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
+import coil3.compose.rememberAsyncImagePainter
+import hr.ferit.imeprezime.naziv_projekta.data.Ingredient
 import hr.ferit.imeprezime.naziv_projekta.R
+import hr.ferit.imeprezime.naziv_projekta.data.Recipe
 import hr.ferit.imeprezime.naziv_projekta.Routes
+import hr.ferit.imeprezime.naziv_projekta.data.RecipeViewModel
+import hr.ferit.imeprezime.naziv_projekta.ui.theme.LightGray
 import hr.ferit.imeprezime.naziv_projekta.ui.theme.Pink
-
-class Ingredient(
-    @DrawableRes val image: Int,
-    val title: String,
-    val subtitle: String
-)
-
-class Recipe(
-    @DrawableRes val image: Int,
-    val title: String,
-    val category: String,
-    val cookingTime: Int,
-    val energy: Int,
-    val rating: Double,
-    val description: String,
-    var isFavorited: Boolean,
-    val reviews: String,
-    val ingredients: List<Ingredient>
-)
-
-val recipes: List<Recipe> = listOf(
-    Recipe(
-        image = R.drawable.strawberry_pie_1,
-        title = "Strawberry Cake",
-        category = "Desserts",
-        cookingTime = 50,
-        energy = 620,
-        rating = 4.9,
-        description = "This dessert is very tasty and not difficult to",
-        reviews = "10 reviews",
-        isFavorited = false,
-        ingredients = listOf(
-            Ingredient(R.drawable.flour,"Flour", "450 g"),
-            Ingredient(R.drawable.eggs, "Eggs", "4"),
-            Ingredient(R.drawable.juice, "Lemon juice", "150 g"),
-            Ingredient(R.drawable.strawberry, "Strawberry", "200 g"),
-            Ingredient(R.drawable.suggar, "Sugar", "1 cup"),
-            Ingredient(R.drawable.mint, "Mint", "20 g"),
-            Ingredient(R.drawable.vanilla, "Vanilla", "1/2 teaspoon"),
-        )
-    ),
-
-    Recipe(
-        image = R.drawable.baklava,
-        title = "baklava",
-        category = "Desserts",
-        cookingTime = 23,
-        energy = 222,
-        rating = 2.9,
-        description = "This dessert is very tasty and not difficult",
-        reviews = "10 reviews",
-        isFavorited = false,
-        ingredients = listOf(
-            Ingredient(R.drawable.flour, "Flour", "450 g"),
-            Ingredient(R.drawable.eggs, "Eggs", "4"),
-            Ingredient(R.drawable.juice, "Lemon juice", "150 g"),
-            Ingredient(R.drawable.strawberry, "Strawberry", "200 g"),
-            Ingredient(R.drawable.suggar, "Sugar", "1 cup"),
-            Ingredient(R.drawable.mint, "Mint", "20 g"),
-            Ingredient(R.drawable.vanilla, "Vanilla", "1/2 teaspoon"),
-        )
-    ),
-    Recipe(
-        image = R.drawable.apple_pie,
-        title = "Apple pie",
-        category = "Desserts",
-        cookingTime = 62,
-        energy = 511,
-        rating = 3.9,
-        description = "This dessert is very tasty and not difficult to prepare.",
-        reviews = "10 reviews",
-        isFavorited = false,
-        ingredients = listOf(
-            Ingredient(R.drawable.flour, "Flour", "450 g"),
-            Ingredient(R.drawable.eggs, "Eggs", "4"),
-            Ingredient(R.drawable.juice, "Lemon juice", "150 g"),
-            Ingredient(R.drawable.strawberry, "Strawberry", "200 g"),
-            Ingredient(R.drawable.suggar, "Sugar", "1 cup"),
-            Ingredient(R.drawable.mint, "Mint", "20 g"),
-            Ingredient(R.drawable.vanilla, "Vanilla", "1/2 teaspoon"),
-        )
-    ),
-
-    Recipe(
-        image = R.drawable.strawberry_pie_3,
-        title = "baklava",
-        category = "Desserts",
-        cookingTime = 23,
-        energy = 222,
-        rating = 2.9,
-        description = "This dessert is very tasty and not difficult",
-        reviews = "10 reviews",
-        isFavorited = false,
-        ingredients = listOf(
-            Ingredient(R.drawable.flour, "Flour", "450 g"),
-            Ingredient(R.drawable.eggs, "Eggs", "4"),
-            Ingredient(R.drawable.juice, "Lemon juice", "150 g"),
-            Ingredient(R.drawable.strawberry, "Strawberry", "200 g"),
-            Ingredient(R.drawable.suggar, "Sugar", "1 cup"),
-            Ingredient(R.drawable.mint, "Mint", "20 g"),
-            Ingredient(R.drawable.vanilla, "Vanilla", "1/2 teaspoon"),
-        )
-    )
-
-)
-
+import hr.ferit.imeprezime.naziv_projekta.ui.theme.White
 
 @Composable
-fun RecipesScreen (modifier: Modifier = Modifier, navigation: NavController) {
+fun RecipesScreen (modifier: Modifier = Modifier, viewModel : RecipeViewModel, navigation: NavController) {
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -171,7 +72,7 @@ fun RecipesScreen (modifier: Modifier = Modifier, navigation: NavController) {
         )
         RecipeCategories()
 
-        RecipeList(navigation)
+        RecipeList(viewModel, navigation)
 
         IconButton(iconResource=R.drawable.ic_plus, text = "Add recipes")
     }
@@ -310,61 +211,68 @@ fun Chip(
 
 @Composable
 fun RecipeCard(
-    modifier: Modifier = Modifier,
-    @DrawableRes imageResource: Int,title:
-    String,onClick: () -> Unit
+    imageResource: String,
+    title: String,
+    onClick: () -> Unit
 ) {
-
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.LightGray),
-        modifier = modifier
+    Box(
+        modifier = Modifier
             .padding(bottom = 16.dp)
             .height(326.dp)
             .width(215.dp)
-            .clickable { onClick() } // Dodajemo navigaciju klikom
     ) {
-        // Glavni Box unutar Card-a
-        Box {
-            // Slika recepta
-            Image(
-                painter = painterResource(id = imageResource),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-            )
-
-            // Kolona s tekstom i detaljima na dnu
-            Column(
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Bottom,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = title,
-                    letterSpacing = 0.32.sp,
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = LightGray),
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .clickable {
+                    onClick()
+                }
+        ) {
+            Box {
+                Image(
+                    painter = rememberAsyncImagePainter(model =
+                    imageResource),
+                    contentDescription = title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
                 )
-
-                Row {
-                    Chip(text = "30 min")
-                    Spacer(Modifier.width(4.dp))
-                    Chip(text = "4 ingredients")
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Bottom,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = title,
+                        letterSpacing = 0.32.sp,
+                        style = TextStyle(
+                            color = White,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                    Row {
+                        Chip(text = "30 min")
+                        Spacer(Modifier.width(4.dp))
+                        Chip(text = "4 ingredients")
+                    }
                 }
             }
         }
     }
 }
+
 @Composable
-fun RecipeList(navigation: NavController) {
+fun RecipeList(
+    viewModel: RecipeViewModel,
+    navigation: NavController
+) {
     Column {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -375,7 +283,8 @@ fun RecipeList(navigation: NavController) {
         ) {
             Text(
                 text = "7 recipes",
-                style = TextStyle(color = Color.DarkGray, fontSize = 14.sp)
+                style = TextStyle(color = Color.DarkGray, fontSize =
+                14.sp)
             )
             Icon(
                 painter = painterResource(id = R.drawable.ic_flame),
@@ -391,12 +300,14 @@ fun RecipeList(navigation: NavController) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            items(recipes.size) { index ->
+            items(viewModel.recipesData.size) {
                 RecipeCard(
-                    imageResource = recipes[index].image,
-                    title = recipes[index].title
+                    imageResource = viewModel.recipesData[it].image,
+                    title = viewModel.recipesData[it].title
                 ) {
-                    navigation.navigate(Routes.getRecipeDetailsPath(index))
+                    navigation.navigate(
+                        Routes.getRecipeDetailsPath(it)
+                    )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }
@@ -406,7 +317,7 @@ fun RecipeList(navigation: NavController) {
 
 @Composable
 fun IngredientCard(
-    @DrawableRes iconResource: Int,
+    iconResource: String,
     title: String,
     subtitle: String
 ) {
@@ -423,7 +334,7 @@ fun IngredientCard(
                 .padding(bottom = 8.dp)
         ) {
             Image(
-                painter = painterResource(id = iconResource),
+                painter = rememberAsyncImagePainter(model = iconResource),
                 contentDescription = title,
                 modifier = Modifier
                     .padding(16.dp)

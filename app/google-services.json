@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "589245007369",
+    "project_id": "ormwalv8-damjanovic",
+    "storage_bucket": "ormwalv8-damjanovic.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:589245007369:android:fc49c9fdb6dcc856059ad8",
+        "android_client_info": {
+          "package_name": "hr.ferit.imeprezime.naziv_projekta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA39tc2oStNPlmE6x_YHtR0BiVN4i3Ibec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
